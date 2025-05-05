@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <title>Добавить объявление</title>
+</head>
+<body>
+    <h1>Добавить объявление</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <label>Название:</label><br />
+        <input type="text" name="name" required /><br /><br />
+        <label>Описание:</label><br />
+        <textarea name="description" required></textarea><br /><br />
+        <label>Цена:</label><br />
+        <input type="number" step="0.01" name="price" required /><br /><br />
+        <label>Фотографии (можно выбрать несколько):</label><br />
+        <input type="file" name="images" multiple /><br /><br />
+        <button type="submit">Добавить</button>
+    </form>
+    <a href="{{ url_for('home') }}">Вернуться</a>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <title>Регистрация</title>
+</head>
+<body>
+    <h1>Регистрация</h1>
+    {% if error %}
+        <p style="color:red;">{{ error }}</p>
+    {% endif %}
+    <form method="POST" action="{{ url_for('register') }}">
+        <label>Email или номер телефона:</label><br />
+        <input type="text" name="email_or_phone" required /><br /><br />
+
+        <label>Пароль:</label><br />
+        <input type="password" name="password" required /><br /><br />
+
+        <button type="submit">Зарегистрироваться</button>
+    </form>
+    <a href="{{ url_for('index') }}">На главную</a>
+</body>
+</html>

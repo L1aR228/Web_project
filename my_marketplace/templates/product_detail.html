@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <title>{{ product.name }}</title>
+</head>
+<body>
+    <h1>{{ product.name }}</h1>
+    <p>{{ product.description }}</p>
+    <p>Цена: {{ product.price }}</p>
+    <p>Владелец: {{ owner_name }}</p>
+    <h2>Фотографии товара</h2>
+    {% if images %}
+        {% for img in images %}
+            <img src="{{ url_for('static', filename=img.image_path) }}" style="max-width:300px; margin:5px;" />
+        {% endfor %}
+    {% else %}
+        <p>Фотографии отсутствуют</p>
+    {% endif %}
+    <a href="{{ url_for('home') }}">Вернуться</a>
+</body>
+</html>
+
+

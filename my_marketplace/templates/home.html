@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <title>Мои объявления</title>
+</head>
+<body>
+    <h1>Добро пожаловать, {{ session['username'] }}</h1>
+    <a href="{{ url_for('add_product') }}">Добавить объявление</a> |
+    <a href="{{ url_for('logout') }}">Выйти</a>
+    <h2>Все объявления</h2>
+    {% if products %}
+        <ul>
+        {% for item in products %}
+            <li style="margin-bottom:20px; border:1px solid #ccc; padding:10px;">
+                <form method="POST" action="{{ url_for('delete_product', product_id=item.product.id) }}" style="display:inline;">
+                    <button type="submit" title="Удалить">🗑️</button>
+                </form>
+                <a href="#">{{ item.product.name }}</a><br />
+                {{ item.product.description }}<br />
+                Цена: {{ item.product.price }}<br />
+                {% if item.images %}
+                    {% for img in item.images %}
+                        <img src="{{ url_for('static', filename=img.image_path) }}" style="max-width:150px; margin:5px;" />
+                        <p>Путь: {{ img.image_path }}</p>
+                    {% endfor %}
+                {% else %}
+                    <p>Фотографии отсутствуют</p>
+                {% endif %}
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>Объявлений еще нет.</p>
+    {% endif %}
+</body>
+</html>
