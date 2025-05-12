@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оформление заказа | Маркетплейс</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .checkout-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        .order-summary {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .order-items {
+            margin: 15px 0;
+        }
+        .order-items li {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #ddd;
+        }
+        .order-total {
+            font-size: 1.2em;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+        }
+        .checkout-form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group textarea,
+        .form-group input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .form-group textarea {
+            min-height: 100px;
+        }
+        .payment-methods {
+            margin-top: 10px;
+        }
+        .payment-methods label {
+            display: block;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .form-actions {
+            margin-top: 30px;
+            text-align: right;
+        }
+        .btn.large {
+            padding: 12px 30px;
+            font-size: 1.1em;
+        }
+        .btn.secondary {
+            background: #6c757d;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1><a href="{{ url_for('index') }}">Маркетплейс</a></h1>
+            <nav>
+                <a href="{{ url_for('home') }}">Мой профиль</a>
+                <a href="{{ url_for('view_cart') }}">Корзина ({{ cart_data.total_items }})</a>
+                <a href="{{ url_for('logout') }}">Выйти</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container checkout-page">
+        <h1>Оформление заказа</h1>
+
+        <div class="checkout-grid">
+            <div class="order-summary">
+                <h2>Ваш заказ</h2>
+                <ul class="order-items">
+                    {% for item in cart_data.cart_items %}
+                    <li>
+                        <span class="item-name">{{ item.product.name }} × {{ item.quantity }}</span>
+                        <span class="item-price">{{ item.product.price * item.quantity }} ₽</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <div class="order-total">
+                    <span>Итого:</span>
+                    <span class="total-amount">{{ cart_data.total_price }} ₽</span>
+                </div>
+            </div>
+
+            <div class="checkout-form">
+                <form method="POST">
+                    <h2>Данные для доставки</h2>
+
+                    <div class="form-group">
+                        <label for="shipping_address">Адрес доставки:</label>
+                        <textarea id="shipping_address" name="shipping_address" required>{{ user.shipping_address or '' }}</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Способ оплаты:</label>
+                        <div class="payment-methods">
+                            <label>
+                                <input type="radio" name="payment_method" value="cash" checked>
+                                Наличными при получении
+                            </label>
+                            <label>
+                                <input type="radio" name="payment_method" value="card">
+                                Банковской картой онлайн
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn large">Подтвердить заказ</button>
+                        <a href="{{ url_for('view_cart') }}" class="btn secondary">Вернуться в корзину</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 Маркетплейс. Все права защищены.</p>
+        </div>
+    </footer>
+</body>
+</html>

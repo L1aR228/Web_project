@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Избранное | Маркетплейс</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1><a href="{{ url_for('index') }}">Маркетплейс</a></h1>
+            <nav>
+                <a href="{{ url_for('home') }}">Мой профиль</a>
+                <a href="{{ url_for('view_cart') }}">Корзина</a>
+                <a href="{{ url_for('view_favorites') }}">Избранное</a>
+                <a href="{{ url_for('logout') }}">Выйти</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <h1>Избранные товары</h1>
+
+        {% if products %}
+        <div class="product-grid">
+            {% for product in products %}
+            <div class="product-card">
+                <a href="{{ url_for('product_detail', product_id=product.id) }}">
+                    {% if product.images %}
+                        <img src="{{ url_for('static', filename=product.images[0].image_path) }}" alt="{{ product.name }}">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='images/placeholder.png') }}" alt="Нет изображения">
+                    {% endif %}
+                    <h3>{{ product.name }}</h3>
+                    <p class="price">{{ product.price }} ₽</p>
+                </a>
+                <form action="{{ url_for('toggle_favorite', product_id=product.id) }}" method="POST">
+                    <button type="submit" class="btn small danger">Удалить</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-favorites">
+            <p>У вас пока нет избранных товаров</p>
+            <a href="{{ url_for('search') }}" class="btn">Найти товары</a>
+        </div>
+        {% endif %}
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 Маркетплейс. Все права защищены.</p>
+        </div>
+    </footer>
+</body>
+</html>

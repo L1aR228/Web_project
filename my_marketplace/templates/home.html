@@ -1,37 +1,308 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8" />
-    <title>Мои объявления</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мой профиль | Маркетплейс</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* Общие стили */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* Шапка профиля */
+        .profile-header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 30px;
+        }
+
+        .profile-header h1 {
+            font-size: 2.2rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 25px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .btn-admin {
+            background: #9b59b6;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        /* Секции товаров */
+        .section-title {
+            text-align: center;
+            margin: 40px 0 30px;
+            font-size: 1.8rem;
+            color: #2c3e50;
+            position: relative;
+        }
+
+        .section-title:after {
+            content: "";
+            display: block;
+            width: 80px;
+            height: 3px;
+            background: #3498db;
+            margin: 15px auto 0;
+        }
+
+        /* Сетка товаров (как на главной) */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+
+        .product-image-container {
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.05);
+        }
+
+        .product-info {
+            padding: 15px;
+        }
+
+        .product-title {
+            font-size: 16px;
+            margin: 0 0 8px 0;
+            color: #333;
+            font-weight: 600;
+            height: 40px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .product-price {
+            color: #e63946;
+            font-size: 18px;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .product-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 14px;
+            border-radius: 4px;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .product-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 15px;
+            }
+
+            .product-image-container {
+                height: 150px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .product-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .profile-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Добро пожаловать, {{ session['username'] }}</h1>
-    <a href="{{ url_for('add_product') }}">Добавить объявление</a> |
-    <a href="{{ url_for('logout') }}">Выйти</a>
-    <h2>Все объявления</h2>
-    {% if products %}
-        <ul>
-        {% for item in products %}
-            <li style="margin-bottom:20px; border:1px solid #ccc; padding:10px;">
-                <form method="POST" action="{{ url_for('delete_product', product_id=item.product.id) }}" style="display:inline;">
-                    <button type="submit" title="Удалить">🗑️</button>
-                </form>
-                <a href="#">{{ item.product.name }}</a><br />
-                {{ item.product.description }}<br />
-                Цена: {{ item.product.price }}<br />
-                {% if item.images %}
-                    {% for img in item.images %}
-                        <img src="{{ url_for('static', filename=img.image_path) }}" style="max-width:150px; margin:5px;" />
-                        <p>Путь: {{ img.image_path }}</p>
-                    {% endfor %}
-                {% else %}
-                    <p>Фотографии отсутствуют</p>
+    <header>
+        <div class="container">
+            <h1><a href="{{ url_for('index') }}">Маркетплейс</a></h1>
+            <nav>
+                <a href="{{ url_for('home') }}">Мой профиль</a>
+                <a href="{{ url_for('view_cart') }}">Корзина ({{ cart_data.total_items }})</a>
+                <a href="{{ url_for('view_favorites') }}">Избранное</a>
+                <a href="{{ url_for('logout') }}">Выйти</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="profile-header">
+            <h1>Добро пожаловать, {{ session['username'] }}!</h1>
+            <div class="profile-actions">
+                <a href="{{ url_for('add_product') }}" class="btn btn-primary">Добавить товар</a>
+                <a href="{{ url_for('view_orders') }}" class="btn btn-secondary">Мои заказы</a>
+                {% if session.get('is_admin') %}
+                    <a href="{{ url_for('admin_categories') }}" class="btn btn-admin">Админ-панель</a>
                 {% endif %}
-            </li>
-        {% endfor %}
-        </ul>
-    {% else %}
-        <p>Объявлений еще нет.</p>
-    {% endif %}
+            </div>
+        </div>
+
+        <section class="my-products">
+            <h2 class="section-title">Мои товары</h2>
+            {% if products %}
+                <div class="product-grid">
+                    {% for product in products %}
+                        {% if product.owner_id == session['user_id'] %}
+                        <div class="product-card">
+                            <a href="{{ url_for('product_detail', product_id=product.id) }}">
+                                <div class="product-image-container">
+                                    {% if product.images %}
+                                        <img src="{{ url_for('serve_uploaded_file', filename=product.images[0].image_path) }}"
+                                             alt="{{ product.name }}"
+                                             class="product-image"
+                                             loading="lazy">
+                                    {% else %}
+                                        <img src="{{ url_for('static', filename='images/placeholder.png') }}"
+                                             alt="Нет изображения"
+                                             class="product-image"
+                                             loading="lazy">
+                                    {% endif %}
+                                </div>
+
+                                <div class="product-info">
+                                    <h3 class="product-title">{{ product.name }}</h3>
+                                    <div class="product-price">{{ product.price }} ₽</div>
+                                    <div class="product-meta">
+                                        <span>Остаток: {{ product.stock }}</span>
+                                        <span>★ {{ product.average_rating() }}</span>
+                                    </div>
+                                </div>
+                            </a>
+                            <div class="product-actions">
+                                <a href="{{ url_for('edit_product', product_id=product.id) }}" class="btn btn-primary btn-small">Редактировать</a>
+                                <form action="{{ url_for('delete_product', product_id=product.id) }}" method="POST" onsubmit="return confirm('Удалить этот товар?')">
+                                    <button type="submit" class="btn btn-danger btn-small">Удалить</button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="text-align: center;">У вас пока нет товаров. <a href="{{ url_for('add_product') }}">Добавить товар</a></p>
+            {% endif %}
+        </section>
+
+        <section class="all-products">
+            <h2 class="section-title">Все товары</h2>
+            {% if products %}
+                <div class="product-grid">
+                    {% for product in products %}
+                        <div class="product-card">
+                            <a href="{{ url_for('product_detail', product_id=product.id) }}">
+                                <div class="product-image-container">
+                                    {% if product.images %}
+                                        <img src="{{ url_for('serve_uploaded_file', filename=product.images[0].image_path) }}"
+                                             alt="{{ product.name }}"
+                                             class="product-image"
+                                             loading="lazy">
+                                    {% else %}
+                                        <img src="{{ url_for('static', filename='images/placeholder.png') }}"
+                                             alt="Нет изображения"
+                                             class="product-image"
+                                             loading="lazy">
+                                    {% endif %}
+                                </div>
+
+                                <div class="product-info">
+                                    <h3 class="product-title">{{ product.name }}</h3>
+                                    <div class="product-price">{{ product.price }} ₽</div>
+                                    <div class="product-meta">
+                                        <span>Продавец: {{ product.owner.username }}</span>
+                                        <span>★ {{ product.average_rating() }}</span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="text-align: center;">Товаров пока нет.</p>
+            {% endif %}
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Маркетплейс. Все права защищены.</p>
+        </div>
+    </footer>
 </body>
 </html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заказ оформлен | Маркетплейс</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1><a href="{{ url_for('index') }}">Маркетплейс</a></h1>
+            <nav>
+                <a href="{{ url_for('home') }}">Мой профиль</a>
+                <a href="{{ url_for('logout') }}">Выйти</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container confirmation-page">
+        <div class="confirmation-box">
+            <h1>Спасибо за ваш заказ!</h1>
+            <p class="order-number">Номер заказа: #{{ order.id[:8] }}</p>
+            <p>Мы отправили подтверждение на вашу электронную почту.</p>
+
+            <div class="order-details">
+                <h2>Детали заказа</h2>
+                <ul>
+                    {% for item in order.items %}
+                    <li>
+                        <span>{{ item.product.name }} × {{ item.quantity }}</span>
+                        <span>{{ item.price * item.quantity }} ₽</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <div class="total">
+                    <span>Итого:</span>
+                    <span>{{ order.total_amount }} ₽</span>
+                </div>
+            </div>
+
+            <div class="shipping-info">
+                <h2>Доставка</h2>
+                <p>{{ order.shipping_address }}</p>
+                <p>Способ оплаты: {{ 'Наличными' if order.payment_method == 'cash' else 'Картой онлайн' }}</p>
+                <p>Статус: {{ order.status }}</p>
+            </div>
+
+            <div class="actions">
+                <a href="{{ url_for('home') }}" class="btn">Вернуться на главную</a>
+                <a href="{{ url_for('view_orders') }}" class="btn secondary">Мои заказы</a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 Маркетплейс. Все права защищены.</p>
+        </div>
+    </footer>
+</body>
+</html>

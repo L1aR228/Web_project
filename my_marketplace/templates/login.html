@@ -1,23 +1,57 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8" />
-    <title>Войти</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход | Маркетплейс</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <h1>Войти</h1>
-    {% if error %}
-        <p style="color:red;">{{ error }}</p>
-    {% endif %}
-    <form method="POST" action="{{ url_for('login') }}">
-        <label>Email или номер телефона:</label><br />
-        <input type="text" name="email_or_phone" required /><br /><br />
+    <header>
+        <div class="container">
+            <h1><a href="{{ url_for('index') }}">Маркетплейс</a></h1>
+            <nav>
+                <a href="{{ url_for('register') }}">Регистрация</a>
+            </nav>
+        </div>
+    </header>
 
-        <label>Пароль:</label><br />
-        <input type="password" name="password" required /><br /><br />
+    <main class="container auth-page">
+        <div class="auth-container">
+            <h1>Вход в систему</h1>
 
-        <button type="submit">Войти</button>
-    </form>
-    <a href="{{ url_for('index') }}">На главную</a>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" class="auth-form">
+                <div class="form-group">
+                    <label for="email_or_username">Email или имя пользователя:</label>
+                    <input type="text" id="email_or_username" name="email_or_username" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Пароль:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+
+                <button type="submit" class="btn">Войти</button>
+            </form>
+
+            <div class="auth-link">
+                Нет аккаунта? <a href="{{ url_for('register') }}">Зарегистрируйтесь</a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 Маркетплейс. Все права защищены.</p>
+        </div>
+    </footer>
 </body>
 </html>

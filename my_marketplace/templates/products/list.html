@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Товары{% endblock %}
+
+{% block content %}
+<div class="products-header">
+    <h1>Наши товары</h1>
+    {% if 'user_id' in session %}
+        <p>Добро пожаловать, {{ session['username'] }}!</p>
+    {% endif %}
+</div>
+
+<div class="products-grid">
+    {% for product in products %}
+    <div class="product-card">
+        {% if product.image %}
+        <img src="{{ url_for('static', filename='uploads/' + product.image) }}" alt="{{ product.name }}">
+        {% else %}
+        <img src="{{ url_for('static', filename='images/placeholder.png') }}" alt="Нет изображения">
+        {% endif %}
+
+        <h3>{{ product.name }}</h3>
+        <p class="price">{{ product.price }} ₽</p>
+        <p class="description">{{ product.description|truncate(100) }}</p>
+
+        <form action="{{ url_for('add_to_cart', product_id=product.id) }}" method="POST">
+            <button type="submit" class="btn">В корзину</button>
+        </form>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,22 +1,162 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8" />
-    <title>Добавить объявление</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить товар | Маркетплейс</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .product-form {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .categories-checkboxes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .categories-checkboxes label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 12px;
+            background: #f5f5f5;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        .btn:not(.secondary) {
+            background: #007bff;
+            color: white;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        .btn.secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .hint {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Добавить объявление</h1>
-    <form method="POST" enctype="multipart/form-data">
-        <label>Название:</label><br />
-        <input type="text" name="name" required /><br /><br />
-        <label>Описание:</label><br />
-        <textarea name="description" required></textarea><br /><br />
-        <label>Цена:</label><br />
-        <input type="number" step="0.01" name="price" required /><br /><br />
-        <label>Фотографии (можно выбрать несколько):</label><br />
-        <input type="file" name="images" multiple /><br /><br />
-        <button type="submit">Добавить</button>
-    </form>
-    <a href="{{ url_for('home') }}">Вернуться</a>
+    <header>
+        <div class="container">
+            <h1><a href="{{ url_for('index') }}">Маркетплейс</a></h1>
+            <nav>
+                <a href="{{ url_for('home') }}">Мой профиль</a>
+                <a href="{{ url_for('logout') }}">Выйти</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <h1>Добавить новый товар</h1>
+
+        <form method="POST" enctype="multipart/form-data" class="product-form">
+            <div class="form-group">
+                <label for="name">Название товара:</label>
+                <input type="text" id="name" name="name" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Описание:</label>
+                <textarea id="description" name="description" class="form-control" required></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="price">Цена (₽):</label>
+                    <input type="number" id="price" name="price" class="form-control"
+                           step="0.01" min="0.01" placeholder="0.00" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="stock">Количество:</label>
+                    <input type="number" id="stock" name="stock" class="form-control"
+                           min="1" value="1" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Категории:</label>
+                <div class="categories-checkboxes">
+                    {% for category in categories %}
+                    <label>
+                        <input type="checkbox" name="categories" value="{{ category.id }}">
+                        {{ category.name }}
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="images">Фотографии товара:</label>
+                <input type="file" id="images" name="images" class="form-control" multiple accept="image/*" required>
+                <p class="hint">Первое загруженное изображение будет основным. Можно выбрать несколько файлов.</p>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn">Добавить товар</button>
+                <a href="{{ url_for('home') }}" class="btn secondary">Отмена</a>
+            </div>
+        </form>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 Маркетплейс. Все права защищены.</p>
+        </div>
+    </footer>
 </body>
 </html>
