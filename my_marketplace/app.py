@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask import send_from_directory
 
-# Инициализация приложения
+
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY') or 'dev-secret-key-123'
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL') or 'sqlite:///database.db'
@@ -16,12 +16,11 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max upload size
 
-# Инициализация базы данных
+
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 
-# Модели данных
 class User(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -31,7 +30,6 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     is_admin = db.Column(db.Boolean, default=False)
 
-    # Связи
     products = db.relationship('Product', backref='owner', lazy=True)
     reviews = db.relationship('Review', backref='author', lazy=True)
     cart_items = db.relationship('Cart', backref='user', lazy=True)
@@ -75,7 +73,7 @@ class Category(db.Model):
     slug = db.Column(db.String(80), unique=True, nullable=False)
     description = db.Column(db.Text)
 
-    # Связи
+
     products = db.relationship('ProductCategory', backref='category', lazy=True, cascade='all, delete-orphan')
 
 
@@ -88,7 +86,7 @@ class ProductCategory(db.Model):
 class ProductImage(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     product_id = db.Column(db.String(36), db.ForeignKey('product.id'), nullable=False)
-    is_main = db.Column(db.Boolean, default=False)  # Корректное определение
+    is_main = db.Column(db.Boolean, default=False)
     image_path = db.Column(db.String(255), nullable=False)
 
 class Review(db.Model):
@@ -119,12 +117,12 @@ class Order(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = db.Column(db.String(36), db.ForeignKey('user.id'), nullable=False)
     total_amount = db.Column(db.Float, nullable=False)
-    status = db.Column(db.String(20), default='pending')  # pending, paid, shipped, delivered, cancelled
+    status = db.Column(db.String(20), default='pending')
     shipping_address = db.Column(db.Text)
     payment_method = db.Column(db.String(50))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # Связи
+
     items = db.relationship('OrderItem', backref='order', lazy=True, cascade='all, delete-orphan')
 
 
@@ -149,7 +147,7 @@ def save_uploaded_file(file):
         upload_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
         os.makedirs(os.path.dirname(upload_path), exist_ok=True)
         file.save(upload_path)
-        return unique_filename  # Возвращаем только имя файла
+        return unique_filename
     return None
 
 def get_cart_data(user_id):
@@ -157,7 +155,7 @@ def get_cart_data(user_id):
     total_items = sum(item.quantity for item in cart_items)
     total_price = sum(item.product.price * item.quantity for item in cart_items)
     return {
-        'cart_items': cart_items,  # Изменили с 'items' на 'cart_items'
+        'cart_items': cart_items,
         'total_items': total_items,
         'total_price': total_price
     }
@@ -192,7 +190,7 @@ def register():
         )
         user.set_password(password)
 
-        # Первый пользователь - админ
+
         if User.query.count() == 0:
             user.is_admin = True
 
@@ -299,7 +297,7 @@ def search():
                            cart_data=cart_data)
 
 
-# Маршруты для работы с товарами
+
 @app.route('/product/<product_id>')
 def product_detail(product_id):
     product = Product.query.get_or_404(product_id)
@@ -307,7 +305,7 @@ def product_detail(product_id):
     reviews = product.reviews
     categories = [pc.category for pc in product.categories]
 
-    # Проверка, есть ли товар в избранном
+
     is_favorite = False
     if 'user_id' in session:
         is_favorite = Favorite.query.filter_by(
@@ -315,7 +313,7 @@ def product_detail(product_id):
             product_id=product.id
         ).first() is not None
 
-    # Похожие товары (из тех же категорий)
+
     similar_products = Product.query.join(ProductCategory).filter(
         ProductCategory.category_id.in_([c.id for c in categories]),
         Product.id != product.id
@@ -340,13 +338,13 @@ def add_product():
 
     if request.method == 'POST':
         try:
-            # Получаем данные с проверкой на None
+
             name = request.form.get('name', '').strip()
             description = request.form.get('description', '').strip()
             price_str = request.form.get('price', '')
             stock_str = request.form.get('stock', '1')
 
-            # Проверка обязательных полей
+
             if not name or not description or not price_str:
                 flash('Заполните все обязательные поля', 'error')
                 return redirect(url_for('add_product'))
@@ -368,7 +366,7 @@ def add_product():
 
             category_ids = request.form.getlist('categories')
 
-            # Создаем продукт
+
             product = Product(
                 name=name,
                 description=description,
@@ -378,9 +376,9 @@ def add_product():
             )
 
             db.session.add(product)
-            db.session.flush()  # Получаем ID продукта
+            db.session.flush()
 
-            # Добавляем категории
+
             for cat_id in category_ids:
                 pc = ProductCategory(
                     product_id=product.id,
@@ -388,7 +386,7 @@ def add_product():
                 )
                 db.session.add(pc)
 
-            # Обработка изображений
+
             files = request.files.getlist('images')
             if not files or all(not file.filename for file in files):
                 flash('Добавьте хотя бы одно изображение', 'error')
@@ -431,7 +429,7 @@ def edit_product(product_id):
         product.price = float(request.form.get('price'))
         product.stock = int(request.form.get('stock', 1))
 
-        # Обновляем категории
+
         ProductCategory.query.filter_by(product_id=product.id).delete()
         for cat_id in request.form.getlist('categories'):
             pc = ProductCategory(
@@ -440,7 +438,7 @@ def edit_product(product_id):
             )
             db.session.add(pc)
 
-        # Добавляем новые изображения
+
         files = request.files.getlist('images')
         for file in files:
             if file and allowed_file(file.filename):
@@ -477,7 +475,7 @@ def delete_product(product_id):
     return redirect(url_for('home'))
 
 
-# Маршруты для корзины
+
 @app.route('/cart')
 def view_cart():
     if 'user_id' not in session:
@@ -558,7 +556,7 @@ def remove_from_cart(cart_id):
     return redirect(url_for('view_cart'))
 
 
-# Маршруты для заказов
+
 @app.route('/checkout', methods=['GET', 'POST'])
 def checkout():
     if 'user_id' not in session:
@@ -567,19 +565,18 @@ def checkout():
     user = User.query.get(session['user_id'])
     cart_data = get_cart_data(session['user_id'])
 
-    # Исправленная проверка на пустую корзину
+
     if not cart_data['cart_items']:
         flash('Ваша корзина пуста', 'warning')
         return redirect(url_for('view_cart'))
 
     if request.method == 'POST':
-        # Проверка наличия товаров
         for item in cart_data['cart_items']:
             if item.quantity > item.product.stock:
                 flash(f'Товара "{item.product.name}" недостаточно в наличии', 'error')
                 return redirect(url_for('view_cart'))
 
-        # Создание заказа
+
         order = Order(
             user_id=session['user_id'],
             total_amount=cart_data['total_price'],
@@ -587,9 +584,8 @@ def checkout():
             payment_method=request.form.get('payment_method')
         )
         db.session.add(order)
-        db.session.flush()  # Получаем ID заказа
+        db.session.flush()
 
-        # Добавление товаров в заказ
         for item in cart_data['cart_items']:
             order_item = OrderItem(
                 order_id=order.id,
@@ -598,9 +594,8 @@ def checkout():
                 price=item.product.price
             )
             db.session.add(order_item)
-            item.product.stock -= item.quantity  # Уменьшение количества на складе
+            item.product.stock -= item.quantity
 
-        # Очистка корзины
         Cart.query.filter_by(user_id=session['user_id']).delete()
 
         db.session.commit()
@@ -630,7 +625,6 @@ def view_orders():
     return render_template('orders.html', orders=orders)
 
 
-# Маршруты для избранного
 @app.route('/favorites')
 def view_favorites():
     if 'user_id' not in session:
@@ -666,7 +660,6 @@ def toggle_favorite(product_id):
     return jsonify({'success': True, 'message': message})
 
 
-# Маршруты для отзывов
 @app.route('/add_review/<product_id>', methods=['POST'])
 def add_review(product_id):
     if 'user_id' not in session:
@@ -680,7 +673,7 @@ def add_review(product_id):
         flash('Некорректная оценка', 'error')
         return redirect(url_for('product_detail', product_id=product.id))
 
-    # Проверяем, не оставлял ли пользователь уже отзыв
+
     existing_review = Review.query.filter_by(
         user_id=session['user_id'],
         product_id=product.id
@@ -761,7 +754,7 @@ def delete_category(category_id):
     return redirect(url_for('admin_categories'))
 
 
-# Обработчики ошибок
+
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
@@ -795,7 +788,7 @@ def test_upload():
 @app.route('/uploads/<path:filename>')
 def serve_uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
-# Запуск приложения
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
